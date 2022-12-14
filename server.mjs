@@ -57,7 +57,7 @@ console.log(id);
     if (products[i].id == id) {
       res.send({
         message: `get product by id: ${products[i].id} success`,
-        data: products[i],
+        products: products[i],
       });
 
       isFound = true;

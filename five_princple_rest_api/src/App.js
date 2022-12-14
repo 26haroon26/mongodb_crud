@@ -23,22 +23,23 @@ function App() {
     editingPrice: "",
     editingDescription: "",
   });
-  const AllProduct = () => {
-    axios
-      .get(`${baseUrl}/products`)
-      .then((response) => {
-        // console.log(response.data);
-        setgetData(response.data.products);
-      })
-      .catch((err) => {
-        console.log("err", err);
-      });
+  const AllProduct = async () => {
+    try {
+      const response = await axios
+        .get(`${baseUrl}/products`)
+        .then((response) => {
+          // console.log(response.data);
+          setgetData(response.data.products);
+        });
+    } catch (err) {
+      console.log("err", err);
+    }
   };
 
-  const SavePost = (e) => {
+  const SavePost = async (e) => {
     e.preventDefault();
     try {
-      axios.post(`${baseUrl}/product`, {
+      const response = await axios.post(`${baseUrl}/product`, {
         name: postName,
         price: postPrice,
         description: postDescription,
@@ -48,36 +49,40 @@ function App() {
       console.log("err", err);
     }
   };
-  const DeletePost = (postId) => {
+  const DeletePost = async (postId) => {
     try {
-      axios.delete(`${baseUrl}/product/${postId}`);
+      const response = await axios.delete(`${baseUrl}/product/${postId}`);
       setistrue(!istrue);
     } catch (err) {
       console.log("err", err);
     }
   };
-  const UpdatePost = (e) => {
+  const UpdatePost = async (e) => {
     e.preventDefault();
-
-    axios
-      .put(`${baseUrl}/product/${Editing.editingId}`, {
-        name: Editing.editingName,
-        price: Editing.editingPrice,
-        description: Editing.editingDescription,
-      })
-      .then((response) => {
-        setistrue(!istrue);
-        setisEdit(!isEdit);
+    try {
+      const response = await axios.put(
+        `${baseUrl}/product/${Editing.editingId}`,
+        {
+          name: Editing.editingName,
+          price: Editing.editingPrice,
+          description: Editing.editingDescription,
+        }
+      );
+      setistrue(!istrue);
+      setisEdit(!isEdit);
+      setEditing({
+        editingId: null,
+        editingName: "",
+        editingPrice: "",
+        editingDescription: "",
       });
-    setEditing({
-      editingId: null,
-      editingName: "",
-      editingPrice: "",
-      editingDescription: "",
-    });
+    } catch (err) {
+      console.log("err", err);
+    }
   };
   useEffect(() => {
     AllProduct();
+    console.log("chal gaya");
   }, [istrue]);
   return (
     <>
@@ -121,7 +126,7 @@ function App() {
                         : `Id :` + eachPost?.id}
                     </p>
 
-                    <h3 className="postDescr overflow" >
+                    <h3 className="postDescr overflow">
                       {isEdit && eachPost.id === Editing.editingId ? (
                         <form className="NextForm" onSubmit={UpdatePost}>
                           <input
