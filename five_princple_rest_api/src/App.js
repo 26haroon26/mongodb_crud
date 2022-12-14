@@ -18,7 +18,7 @@ function App() {
   const [istrue, setistrue] = useState(false);
   const [isEdit, setisEdit] = useState(false);
   const [Editing, setEditing] = useState({
-    editingId: null,
+    editing_id: null,
     editingName: "",
     editingPrice: "",
     editingDescription: "",
@@ -29,7 +29,7 @@ function App() {
         .get(`${baseUrl}/products`)
         .then((response) => {
           // console.log(response.data);
-          setgetData(response.data.products);
+          setgetData(response.data.data.reverse());
         });
     } catch (err) {
       console.log("err", err);
@@ -49,9 +49,9 @@ function App() {
       console.log("err", err);
     }
   };
-  const DeletePost = async (postId) => {
+  const DeletePost = async (post_id) => {
     try {
-      const response = await axios.delete(`${baseUrl}/product/${postId}`);
+      const response = await axios.delete(`${baseUrl}/product/${post_id}`);
       setistrue(!istrue);
     } catch (err) {
       console.log("err", err);
@@ -61,7 +61,7 @@ function App() {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `${baseUrl}/product/${Editing.editingId}`,
+        `${baseUrl}/product/${Editing.editing_id}`,
         {
           name: Editing.editingName,
           price: Editing.editingPrice,
@@ -71,7 +71,7 @@ function App() {
       setistrue(!istrue);
       setisEdit(!isEdit);
       setEditing({
-        editingId: null,
+        editing_id: null,
         editingName: "",
         editingPrice: "",
         editingDescription: "",
@@ -121,13 +121,13 @@ function App() {
                 <div className="post" key={i}>
                   <div className="postText">
                     <p className="overflow">
-                      {isEdit && eachPost.id === Editing.editingId
+                      {isEdit && eachPost._id === Editing.editing_id
                         ? null
-                        : `Id :` + eachPost?.id}
+                        : `_id :` + eachPost?._id}
                     </p>
 
                     <h3 className="postDescr overflow">
-                      {isEdit && eachPost.id === Editing.editingId ? (
+                      {isEdit && eachPost._id === Editing.editing_id ? (
                         <form className="NextForm" onSubmit={UpdatePost}>
                           <input
                             type="text"
@@ -177,12 +177,12 @@ function App() {
                     </h3>
 
                     <span className="overflow">
-                      {isEdit && eachPost.id === Editing.editingId
+                      {isEdit && eachPost._id === Editing.editing_id
                         ? null
                         : `Price :` + eachPost?.price}
                     </span>
                     <p className="overflow">
-                      {isEdit && eachPost.id === Editing.editingId
+                      {isEdit && eachPost._id === Editing.editing_id
                         ? null
                         : `Description :` + eachPost?.description}
                     </p>
@@ -190,7 +190,7 @@ function App() {
                       <button
                         className="button"
                         onClick={() => {
-                          DeletePost(eachPost?.id);
+                          DeletePost(eachPost?._id);
                         }}
                       >
                         Delete
@@ -199,7 +199,7 @@ function App() {
                         className="button"
                         onClick={() => {
                           setEditing({
-                            editingId: eachPost?.id,
+                            editing_id: eachPost?._id,
                             editingName: eachPost?.name,
                             editingPrice: eachPost?.price,
                             editingDescription: eachPost?.description,

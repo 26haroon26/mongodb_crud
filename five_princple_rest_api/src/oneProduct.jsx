@@ -12,73 +12,75 @@ if (window.location.href.split(":")[0] === "http") {
 function OneProduct() {
   const [istrue, setistrue] = useState(false);
   const [isEdit, setisEdit] = useState(false);
-  const [ProductId, setProductId] = useState("");
-  const [ProductIdData, setProductIdData] = useState();
-  const [EditProductIdData, setEditProductIdData] = useState({
+  const [ProductName, setProductName] = useState("");
+  const [ProductNameData, setProductNameData] = useState();
+  const [EditProductNameData, setEditProductNameData] = useState({
     EditProductIdId: null,
     EditProductIdName: "",
     EditProductIdPrice: "",
     EditProductIdDescription: "",
   });
 
-  const Product = (e) => {
+  const Product = async (e) => {
     e.preventDefault();
-    axios
-      .get(`${baseUrl}/product/${ProductId}`)
-      .then((response) => {
-        // setgetData([response.data.data])
-        setProductIdData(response.data.data);
-        setistrue(!istrue);
-      })
-      .catch((err) => {
-        console.log("err", err);
-      });
+    try {
+      const response = await axios.get(`${baseUrl}/product/${ProductName}`);
+      // setgetData([response.data.data])
+      setProductNameData(response.data.data);
+      console.log(response.data.data);
+      setistrue(!istrue);
+    } catch (err) {
+      console.log("err", err);
+    }
   };
   return (
     <>
       <div className="flex b_bottom">
-          <form className="newform" onSubmit={Product}>
-            <input
-              required
-              type="number"
-              className="input"
-              onChange={(e) => {
-                setProductId(e.target.value);
-              }}
-              placeholder="Please Enter Id"
-            />
-            <input type="submit" className="button" value="Get 1" />
-          </form>
-            {ProductIdData ? (
-              <div className="post">
-                <div className="postText">
-                  <p className="overflow">
-                    {isEdit && ProductIdData.id === EditProductIdData.editingId
-                      ? null
-                      : `Id :` + ProductIdData?.id}
-                  </p>
+        <form className="newform" onSubmit={Product}>
+          <input
+            required
+            type="text"
+            className="input"
+            onChange={(e) => {
+              setProductName(e.target.value);
+            }}
+            placeholder="Please Enter Name"
+          />
+          <input type="submit" className="button" value="check" />
+        </form>
+        {ProductNameData.map((eachpost,i)=>{
+          return(
+<div className="post" key={i}>
+            <div className="postText">
+            <p className="overflow">
+                      {isEdit && eachpost._id === Editing.editing_id
+                        ? null
+                        : `_id :` + eachpost?._id}
+                    </p>
 
-                  <h3 className="postDescr overflow">
-                    {isEdit && ProductIdData.id === EditProductIdData.editingId
-                      ? null
-                      : `Name :` + ProductIdData?.name}
-                  </h3>
+              <h3 className="postDescr overflow">
+              {isEdit && eachpost._id === Editing.editing_id
+                        ? null
+                        : `Name :` + eachpost?.name}
+              </h3>
 
-                  <span className="overflow">
-                    {isEdit && ProductIdData.id === EditProductIdData.editingId
-                      ? null
-                      : `Price :` + ProductIdData?.price}
-                  </span>
-                  <p className="overflow">
-                    {isEdit && ProductIdData.id === EditProductIdData.editingId
-                      ? null
-                      : `Description :${ProductIdData?.description}`}
-                  </p>
-                  <div style={{ margin: "10px auto" }}>
-                  </div>
-                </div>
-              </div>
-            ) : null}
+              <span className="overflow">
+              {isEdit && eachpost._id === Editing.editing_id
+                        ? null
+                        : `Price :` + eachpost?.price}
+              </span>
+              <p className="overflow">
+              {isEdit && eachpost._id === Editing.editing_id
+                        ? null
+                        : `_id :` + eachpost?.desc}
+              </p>
+              <div style={{ margin: "10px auto" }}></div>
+            </div>
+          </div>
+          )
+        })
+          
+        }
       </div>
     </>
   );

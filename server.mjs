@@ -1,29 +1,39 @@
 import express from "express";
 import path from "path";
 import cors from "cors";
-
+import mongoose from "mongoose";
 const app = express();
 const port = process.env.PORT || 4000;
-
+const mongodbURI =
+  process.env.mongodbURI ||
+  "mongodb+srv://abc:abc@cluster0.qgyid76.mongodb.net/productdatabase?retryWrites=true&w=majority";
 app.use(cors());
 app.use(express.json());
 
 let products = []; // TODO: connect with mongodb instead
-  //mongodb url mongodb+srv://abc:abc@cluster0.qgyid76.mongodb.net/?retryWrites=true&w=majority
+
+let productSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  price: Number,
+  description: String,
+  createdOn: { type: Date, default: Date.now },
+});
+// line 22 name find krne keley kia he agr sare string pr krna ho to   productSchema.index({"$**":"text"}) lgaen ge
+productSchema.index({name:"text"})
+const productModel = mongoose.model("products", productSchema);
 
 app.post("/product", (req, res) => {
   const body = req.body;
 
   if (
     // validation
-    !body.name &&
-    !body.price &&
+    !body.name ||
+    !body.price ||
     !body.description
   ) {
     res.status(400).send({
       message: "required parameters missing",
     });
-    console.log(products);
     return;
   }
 
@@ -31,123 +41,193 @@ app.post("/product", (req, res) => {
   console.log(body.price);
   console.log(body.description);
 
-  products.push({
-    id: new Date().getTime(),
-    name: body.name,
-    price: body.price,
-    description: body.description,
-  });
+  productModel.create(
+    {
+      name: body.name,
+      price: body.price,
+      description: body.description,
+    },
+    (err, saved) => {
+      if (!err) {
+        console.log(saved);
 
-  res.send({
-    message: "product added successfully",
-  });
+        res.send({
+          message: "product added successfully",
+        });
+      } else {
+        res.status(500).send({
+          message: "server error",
+        });
+      }
+    }
+  );
 });
 
 app.get("/products", (req, res) => {
-  res.send({
-    message: "got all products successfully",
-    products: products,
+  productModel.find({}, (err, data) => {
+    if (!err) {
+      res.send({
+        message: "got all products successfully",
+        data: data,
+      });
+    } else {
+      res.status(500).send({
+        message: "server error",
+      });
+    }
   });
 });
-app.get("/product/:id", (req, res) => {
-  const id = req.params.id;
-console.log(id);
-  let isFound = false;
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id == id) {
-      res.send({
-        message: `get product by id: ${products[i].id} success`,
-        products: products[i],
-      });
+// id pr 1 product ka data mangane keley
 
-      isFound = true;
-      break;
-    }
-  }
-  if (isFound === false) {
-    res.status(404);
-    res.send({
-      message: "product not found",
-    });
-  }
-  return;
-});
+// app.get("/product/:id", (req, res) => {
+//   const id = req.params.id;
 
-app.delete("/product/:id", (req, res) => {
-    const id = req.params.id;
-    console.log( 'get id',id);
+//   productModel.findOne({ _id: id }, (err, data) => {
+//     if (!err) {
+//       if (data) {
+//         res.send({
+//           message: `get product by id: ${data._id} success`,
+//           data: data,
+//         });
+//       } else {
+//         res.status(404).send({
+//           message: "product not found",
+//         });
+//       }
+//     } else {
+//       res.status(500).send({
+//         message: "server error",
+//       });
+//     }
+//   });
+// });
 
-    let isFound = false;
-    for (let i = 0; i < products.length; i++) {
-        if (products[i].id == id) {
-            // console.log('products[i].id' ,products[i].id);
-            products.splice(i, 1);
-            res.send({
-                message: "product deleted successfully"
-            });
-            isFound = true
-            break;
-        }
-    }
-    if (isFound === false) {
-        res.status(404)
+// name find krne keley
+
+app.get("/product/:name", (req, res) => {
+console.log(req.params.name);
+const name = req.params.name;
+  productModel.find({ $text:{$search:name} }
+    , (err, data) => {
+    if (!err) {
+      if (data) {
         res.send({
-            message: "delete fail: product not found"
+          message: `get product by id: ${data._id} success`,
+          data: data,
         });
-    } 
-
+      } else {
+        res.status(404).send({
+          message: "product not found",
+        });
+      }
+    } else {
+      res.status(500).send({
+        message: "server error",
+      });
+    }
+  });
 });
-app.put("/product/:id", (req, res) => {
-  const body = req.body;
-
-  console.log(body);
+app.delete("/product/:id", (req, res) => {
   const id = req.params.id;
 
-  if (
-    // validation
-    !body.name &&
-    !body.price &&
-    !body.description
-  ) {
-    res.status(400).send({
-      message: "required parameters missing",
-    });
+  productModel.deleteOne({ _id: id }, (err, deletedData) => {
+    console.log("deleted: ", deletedData);
+    if (!err) {
+      if (deletedData.deletedCount !== 0) {
+        res.send({
+          message: "Product has been deleted successfully",
+        });
+      } else {
+        res.status(404);
+        res.send({
+          message: "No Product found with this id: " + id,
+        });
+      }
+    } else {
+      res.status(500).send({
+        message: "server error",
+      });
+    }
+  });
+});
+app.put("/product/:id", async (req, res) => {
+  const body = req.body;
+  const id = req.params.id;
+
+  if (!body.name || !body.price || !body.description) {
+    // is trh jo api response message de ius ko self document api kehte hen
+    res.status(400).send(` required parameter missing. example request body:
+      {
+          "name": "value",
+          "price": "value",
+          "description": "value"
+      }`);
     return;
   }
 
-  console.log(body.name);
-  console.log(body.price);
-  console.log(body.description);
+  try {
+    let data = await productModel
+      .findByIdAndUpdate(
+        id,
+        {
+          name: body.name,
+          price: body.price,
+          description: body.description,
+        },
+        { new: true }
+      )
+      .exec();
 
-  let isFound = false;
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id == id) {
-      products[i].name = body.name;
-      products[i].price = body.price;
-      products[i].description = body.description;
+    console.log("updated: ", data);
 
-      res.send({
-        message: "product modified successfully",
-      });
-      isFound = true;
-      break;
-    }
-  }
-  if (!isFound) {
-    // res.status(404);
     res.send({
-      message: "edit fail: product not found",
+      message: "product modified successfully",
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: "server error",
     });
   }
-  // res.send({
-  //   message: "product added successfully",
-  // });
 });
 
 const __dirname = path.resolve();
-app.use("/", express.static(path.join(__dirname, "./five_princple_rest_api/build")));
-app.use("*", express.static(path.join(__dirname, "./five_princple_rest_api/build")));
+app.use(
+  "/",
+  express.static(path.join(__dirname, "./five_princple_rest_api/build"))
+);
+app.use(
+  "*",
+  express.static(path.join(__dirname, "./five_princple_rest_api/build"))
+);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
+});
+
+mongoose.connect(mongodbURI);
+
+mongoose.connection.on("connected", function () {
+  //connected
+  console.log("Mongoose is connected");
+});
+
+mongoose.connection.on("disconnected", function () {
+  //disconnected
+  console.log("Mongoose is disconnected");
+  process.exit(1);
+});
+
+mongoose.connection.on("error", function (err) {
+  //any error
+  console.log("Mongoose connection error: ", err);
+  process.exit(1);
+});
+
+process.on("SIGINT", function () {
+  /////this function will run jst before app is closing
+  console.log("app is terminating");
+  mongoose.connection.close(function () {
+    console.log("Mongoose default connection closed");
+    process.exit(0);
+  });
 });
