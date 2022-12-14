@@ -48,31 +48,23 @@ function OneProduct() {
           />
           <input type="submit" className="button" value="check" />
         </form>
-        {ProductNameData.map((eachpost,i)=>{
+        {ProductNameData?.map((eachpost,i)=>{
           return(
 <div className="post" key={i}>
             <div className="postText">
             <p className="overflow">
-                      {isEdit && eachpost._id === Editing.editing_id
-                        ? null
-                        : `_id :` + eachpost?._id}
+                       {`id :` + eachpost?._id}
                     </p>
 
               <h3 className="postDescr overflow">
-              {isEdit && eachpost._id === Editing.editing_id
-                        ? null
-                        : `Name :` + eachpost?.name}
+              { `Name :` + eachpost?.name}
               </h3>
 
               <span className="overflow">
-              {isEdit && eachpost._id === Editing.editing_id
-                        ? null
-                        : `Price :` + eachpost?.price}
+              {`Price :` + eachpost?.price}
               </span>
               <p className="overflow">
-              {isEdit && eachpost._id === Editing.editing_id
-                        ? null
-                        : `_id :` + eachpost?.desc}
+              {`Description :` + eachpost?.description}
               </p>
               <div style={{ margin: "10px auto" }}></div>
             </div>

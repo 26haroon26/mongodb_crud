@@ -112,7 +112,7 @@ const name = req.params.name;
     if (!err) {
       if (data) {
         res.send({
-          message: `get product by id: ${data._id} success`,
+          message: `get product by success`,
           data: data,
         });
       } else {
