@@ -19,7 +19,7 @@ let productSchema = new mongoose.Schema({
   createdOn: { type: Date, default: Date.now },
 });
 // line 22 name find krne keley kia he agr sare string pr krna ho to   productSchema.index({"$**":"text"}) lgaen ge
-productSchema.index({name:"text"})
+// productSchema.index({name:"text"})
 const productModel = mongoose.model("products", productSchema);
 
 app.post("/product", (req, res) => {
@@ -106,8 +106,8 @@ app.get("/products", (req, res) => {
 
 app.get("/product/:name", (req, res) => {
 console.log(req.params.name);
-const name = req.params.name;
-  productModel.find({ $text:{$search:name} }
+const querryName = req.params.name;
+  productModel.find({ name:{$regex:`${querryName}`}}
     , (err, data) => {
     if (!err) {
       if (data) {

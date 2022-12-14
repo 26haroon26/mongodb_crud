@@ -48,31 +48,25 @@ function OneProduct() {
           />
           <input type="submit" className="button" value="check" />
         </form>
-        {ProductNameData?.map((eachpost,i)=>{
-          return(
-<div className="post" key={i}>
-            <div className="postText">
-            <p className="overflow">
-                       {`id :` + eachpost?._id}
-                    </p>
+        {ProductNameData?.map((eachpost, i) => {
+          return (
+            <div className="post" key={i}>
+              <div className="postText">
+                <p className="overflow">{`id :` + eachpost?._id}</p>
 
-              <h3 className="postDescr overflow">
-              { `Name :` + eachpost?.name}
-              </h3>
+                <h3 className="postDescr overflow">
+                  {`Name :` + eachpost?.name}
+                </h3>
 
-              <span className="overflow">
-              {`Price :` + eachpost?.price}
-              </span>
-              <p className="overflow">
-              {`Description :` + eachpost?.description}
-              </p>
-              <div style={{ margin: "10px auto" }}></div>
+                <span className="overflow">{`Price :` + eachpost?.price}</span>
+                <p className="overflow">
+                  {`Description :` + eachpost?.description}
+                </p>
+                <div style={{ margin: "10px auto" }}></div>
+              </div>
             </div>
-          </div>
-          )
-        })
-          
-        }
+          );
+        })}
       </div>
     </>
   );
