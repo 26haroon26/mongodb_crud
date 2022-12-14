@@ -29,7 +29,7 @@ function App() {
         .get(`${baseUrl}/products`)
         .then((response) => {
           // console.log(response.data);
-          setgetData(response.data.data.reverse());
+          setgetData(response.data.data);
         });
     } catch (err) {
       console.log("err", err);
