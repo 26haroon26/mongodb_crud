@@ -7,7 +7,7 @@ let baseUrl = "";
 if (window.location.href.split(":")[0] === "http") {
   baseUrl = "http://localhost:4000";
 } else {
-  baseUrl = "https://wild-tan-narwhal-kilt.cyclic.app/";
+  baseUrl = "https://mongodb-crud.up.railway.app/";
 }
 
 function App() {
